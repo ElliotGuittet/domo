@@ -5,8 +5,13 @@ import {
   signInWithCredential,
   signOut,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  updateEmail,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAVbImIcm40ZbAyyUHa9jlx-nSyPv-d3BY",
@@ -19,5 +24,10 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-export { auth, GoogleAuthProvider, signInWithCredential, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword };
+export {
+  auth, db, GoogleAuthProvider, signInWithCredential, signOut, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider,
+  doc, setDoc, getDoc, updateDoc
+};

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "./firebaseConfig";
+import { useNavigation } from "@react-navigation/native";
 
 const LoginScreen = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
@@ -63,6 +65,9 @@ const LoginScreen = () => {
       {user ? (
         <View>
           <Text style={styles.text}>Bienvenue, {user.email}</Text>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Informations personnelles")}>
+            <Text style={styles.buttonText}>Gérer mon profil</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleSignOut} disabled={loading}>
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Se déconnecter</Text>}
           </TouchableOpacity>
