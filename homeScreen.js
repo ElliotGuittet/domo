@@ -21,15 +21,13 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Bienvenue, {user?.email}</Text>
 
-      {/* Exemple d'un bouton pour aller à une page de gestion du profil */}
-      <TouchableOpacity
+     <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Informations personnelles")}
       >
         <Text style={styles.buttonText}>Gérer mon profil</Text>
       </TouchableOpacity>
 
-      {/* Exemple d'un bouton pour ouvrir le quiz */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Ouvrir quiz")}
@@ -37,7 +35,16 @@ const HomeScreen = () => {
         <Text style={styles.buttonText}>Ouvrir quiz</Text>
       </TouchableOpacity>
 
-      {/* Bouton pour se déconnecter */}
+
+      <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("News")}
+        >
+          <Text style={styles.buttonText}>Ouvrir news</Text>
+        </TouchableOpacity>
+
+
+
       <TouchableOpacity
         style={styles.button}
         onPress={handleSignOut}

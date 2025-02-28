@@ -7,6 +7,7 @@ import ProfileScreen from "./profileScreen";
 import ChangePasswordScreen from "./changePasswordScreen";
 import QuizScreen from "./quizScreen";
 import HomeScreen from "./homeScreen";
+import NewsScreen from "./newsScreen";
 import { auth } from "./firebaseConfig"; // Import Firebase Auth
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -42,6 +43,7 @@ const App = () => {
             <Stack.Screen name="Modifier Mot de Passe" component={ChangePasswordScreen} />
             <Stack.Screen name="Ouvrir quiz" component={QuizScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="News" component={NewsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
