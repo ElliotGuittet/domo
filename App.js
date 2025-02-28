@@ -5,6 +5,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./loginScreen";
 import ProfileScreen from "./profileScreen";
 import ChangePasswordScreen from "./changePasswordScreen";
+import QuizScreen from "./quizScreen";
+import HomeScreen from "./homeScreen";
 import { auth } from "./firebaseConfig"; // Import Firebase Auth
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -38,6 +40,8 @@ const App = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Informations personnelles" component={ProfileScreen} />
             <Stack.Screen name="Modifier Mot de Passe" component={ChangePasswordScreen} />
+            <Stack.Screen name="Ouvrir quiz" component={QuizScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
