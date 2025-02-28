@@ -4,7 +4,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./loginScreen";
 import ProfileScreen from "./profileScreen";
-import ChangeEmailScreen from "./changeEmailScreen";
 import ChangePasswordScreen from "./changePasswordScreen";
 import { auth } from "./firebaseConfig"; // Import Firebase Auth
 import { onAuthStateChanged } from "firebase/auth";
@@ -38,7 +37,6 @@ const App = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Informations personnelles" component={ProfileScreen} />
-            <Stack.Screen name="Modifier Email" component={ChangeEmailScreen} />
             <Stack.Screen name="Modifier Mot de Passe" component={ChangePasswordScreen} />
       </Stack.Navigator>
     </NavigationContainer>

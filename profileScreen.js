@@ -53,18 +53,12 @@ const PersonalInfoScreen = () => {
       <TouchableOpacity style={styles.button} onPress={handleSaveProfile} disabled={loading}>
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Enregistrer</Text>}
       </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("Modifier Email")}  // Appel de l'écran Modifier Email
-            >
-              <Text style={styles.buttonText}>Modifier l'Email</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("Modifier Mot de Passe")}  // Appel de l'écran Modifier Mot de Passe
-            >
-              <Text style={styles.buttonText}>Modifier le Mot de Passe</Text>
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Modifier Mot de Passe")}  // Appel de l'écran Modifier Mot de Passe
+        >
+          <Text style={styles.buttonText}>Modifier le Mot de Passe</Text>
+        </TouchableOpacity>
     </View>
   );
 };
