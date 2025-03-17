@@ -5,7 +5,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 
 const PersonalInfoScreen = () => {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [age, setAge] = useState("");
@@ -38,6 +38,9 @@ const PersonalInfoScreen = () => {
       await setDoc(userRef, { firstName, lastName, age }, { merge: true });
 
       Alert.alert("Succès", "Profil mis à jour !");
+
+      // Rediriger vers la HomeScreen après la mise à jour réussie
+      navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Erreur", error.message);
     }
@@ -46,19 +49,43 @@ const PersonalInfoScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput style={styles.input} placeholder="Prénom" value={firstName} onChangeText={setFirstName} />
-      <TextInput style={styles.input} placeholder="Nom" value={lastName} onChangeText={setLastName} />
-      <TextInput style={styles.input} placeholder="Âge" value={age} onChangeText={setAge} keyboardType="numeric" />
+      <TextInput
+        style={styles.input}
+        placeholder="Prénom"
+        value={firstName}
+        onChangeText={setFirstName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Nom"
+        value={lastName}
+        onChangeText={setLastName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Âge"
+        value={age}
+        onChangeText={setAge}
+        keyboardType="numeric"
+      />
 
-      <TouchableOpacity style={styles.button} onPress={handleSaveProfile} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Enregistrer</Text>}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSaveProfile}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Enregistrer</Text>
+        )}
       </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Modifier Mot de Passe")}  // Appel de l'écran Modifier Mot de Passe
-        >
-          <Text style={styles.buttonText}>Modifier le Mot de Passe</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Modifier Mot de Passe")}
+      >
+        <Text style={styles.buttonText}>Modifier le Mot de Passe</Text>
+      </TouchableOpacity>
     </View>
   );
 };

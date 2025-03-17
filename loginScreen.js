@@ -44,7 +44,7 @@ const LoginScreen = () => {
       "auth/user-not-found": "Utilisateur non trouvé.",
       "auth/wrong-password": "Mot de passe incorrect.",
     };
-    return errorMessages[code] || "Une erreur est survenue.";
+    return errorMessages[code] || "Erreur d'authentification ! Veuillez être certain que l'user et le mot de passe correspondent bien.";
   };
 
   return (

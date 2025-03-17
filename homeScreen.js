@@ -1,12 +1,35 @@
 // HomeScreen.js
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { auth } from './firebaseConfig';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { auth, db } from './firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
+import { doc, getDoc } from 'firebase/firestore';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const user = auth.currentUser; // Récupérer l'utilisateur connecté
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          const userRef = doc(db, "users", user.uid); // Utiliser l'ID de l'utilisateur connecté
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            setUserData(userSnap.data());
+          } else {
+            console.log("Aucun utilisateur trouvé");
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération des données utilisateur:", error);
+          Alert.alert("Erreur", "Impossible de récupérer les informations de l'utilisateur.");
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -17,11 +40,15 @@ const HomeScreen = () => {
     }
   };
 
+  const isUserDataComplete = () => {
+    return userData && userData.firstName && userData.lastName && userData.age;
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Bienvenue, {user?.email}</Text>
 
-     <TouchableOpacity
+      <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Informations personnelles")}
       >
@@ -32,18 +59,32 @@ const HomeScreen = () => {
         style={styles.button}
         onPress={() => navigation.navigate("Ouvrir quiz")}
       >
-        <Text style={styles.buttonText}>Ouvrir quiz</Text>
+        <Text style={styles.buttonText}>Quiz</Text>
       </TouchableOpacity>
 
-
-      <TouchableOpacity
+      {/* Vérifier si les informations sont complètes avant d'afficher le bouton News */}
+      {isUserDataComplete() ? (
+        <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("News")}
         >
-          <Text style={styles.buttonText}>Ouvrir news</Text>
+          <Text style={styles.buttonText}>News</Text>
         </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={[styles.button, styles.disabledButton]}
+          disabled={true}
+        >
+          <Text style={styles.buttonText}>News (Complétez votre profil)</Text>
+        </TouchableOpacity>
+      )}
 
-
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Stats du quiz")}
+      >
+        <Text style={styles.buttonText}>Stats quiz</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}
@@ -78,6 +119,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
+  },
+  disabledButton: {
+    backgroundColor: '#ddd',
   },
 });
 
