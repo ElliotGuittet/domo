@@ -9,6 +9,7 @@ const PersonalInfoScreen = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [age, setAge] = useState("");
+  const [email, setEmail] = useState("");  // Ajouter un état pour l'email
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ const PersonalInfoScreen = () => {
         setFirstName(data.firstName || "");
         setLastName(data.lastName || "");
         setAge(data.age || "");
+        setEmail(user.email); // Récupère l'email depuis auth et l'affiche
       }
     };
 
@@ -35,7 +37,7 @@ const PersonalInfoScreen = () => {
       if (!user) throw new Error("Utilisateur non connecté.");
 
       const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, { firstName, lastName, age }, { merge: true });
+      await setDoc(userRef, { firstName, lastName, age, email: user.email }, { merge: true }); // Inclure l'email ici
 
       Alert.alert("Succès", "Profil mis à jour !");
 
@@ -68,6 +70,12 @@ const PersonalInfoScreen = () => {
         onChangeText={setAge}
         keyboardType="numeric"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        editable={false} // L'email ne doit pas être modifiable
+      />
 
       <TouchableOpacity
         style={styles.button}
@@ -86,6 +94,13 @@ const PersonalInfoScreen = () => {
       >
         <Text style={styles.buttonText}>Modifier le Mot de Passe</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Amis")}
+      >
+        <Text style={styles.buttonText}>Voir mes Amis</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
