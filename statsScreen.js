@@ -1,11 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, Alert } from "react-native";
-import { db } from "./firebaseConfig";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, Alert, TouchableOpacity } from "react-native";
+import { db, auth } from "./firebaseConfig";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 
 const StatsScreen = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFriendsView, setIsFriendsView] = useState(false); // For toggling between general and friends leaderboard
+  const [friends, setFriends] = useState([]); // List of user's friends
+
+  // Fetch the friends list of the current user
+  const fetchFriends = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists() && userDoc.data().friends) {
+      // Add the current user's ID to the list of friends
+      const friendIds = [user.uid, ...userDoc.data().friends]; // Include the current user
+
+      const friendsData = await Promise.all(
+        friendIds.map(async (friendId) => {
+          const friendRef = doc(db, "users", friendId);
+          const friendSnap = await getDoc(friendRef);
+          return friendSnap.exists()
+            ? { id: friendId, name: `${friendSnap.data().firstName} ${friendSnap.data().lastName}` }
+            : null;
+        })
+      );
+
+      // Filter out null values (if any)
+      setFriends(friendsData.filter(friend => friend !== null));
+    }
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -13,7 +42,9 @@ const StatsScreen = () => {
         setLoading(true);
         const resultsSnapshot = await getDocs(collection(db, "quiz_results"));
         let usersData = [];
+        const currentUser = auth.currentUser;
 
+        // Fetch quiz results for users
         for (const quizDoc of resultsSnapshot.docs) {
           const userId = quizDoc.id;
           const quizData = quizDoc.data();
@@ -21,7 +52,6 @@ const StatsScreen = () => {
           if (quizData.score !== undefined && quizData.total !== undefined) {
             const userRef = doc(db, "users", userId);
             const userSnap = await getDoc(userRef);
-
             if (userSnap.exists()) {
               const userData = userSnap.data();
               const fullName = `${userData.firstName} ${userData.lastName}`;
@@ -35,23 +65,38 @@ const StatsScreen = () => {
                 score: quizData.score,
                 total: quizData.total,
                 successRate: successRate,
+                isCurrentUser: userId === currentUser?.uid, // Mark the current user
               });
             }
           }
         }
 
+        // Sort leaderboard by score in descending order
         usersData.sort((a, b) => b.score - a.score);
         setLeaderboard(usersData);
       } catch (error) {
-        console.error("Erreur récupération stats:", error);
-        Alert.alert("Erreur", "Impossible de récupérer les statistiques.");
+        console.error("Error fetching stats:", error);
+        Alert.alert("Error", "Unable to fetch statistics.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchStats();
+    fetchFriends(); // Fetch the friends list on component mount
   }, []);
+
+  const handleToggleView = () => {
+    setIsFriendsView((prevState) => !prevState);
+  };
+
+  // Filter the leaderboard to show only friends when toggling to the friends view
+    const filteredLeaderboard = isFriendsView
+      ? leaderboard.filter((item) => {
+          // Include the current user in the friends leaderboard view
+          return item.id === auth.currentUser.uid || friends.some((friend) => friend.id === item.id);
+        })
+      : leaderboard;
 
   if (loading) return <ActivityIndicator size="large" color="#357" />;
 
@@ -59,11 +104,19 @@ const StatsScreen = () => {
     <View style={styles.container}>
       <Text style={styles.heading}>🏆 Classement des Joueurs 🏆</Text>
 
-      {leaderboard.length === 0 ? (
+      {/* Toggle button for switching between general leaderboard and friends leaderboard */}
+      <TouchableOpacity style={styles.toggleButton} onPress={handleToggleView}>
+        <Text style={styles.toggleButtonText}>
+          {isFriendsView ? "Voir le Classement Général" : "Voir mes Amis"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Display leaderboard */}
+      {filteredLeaderboard.length === 0 ? (
         <Text style={styles.noData}>Aucune donnée disponible.</Text>
       ) : (
         <FlatList
-          data={leaderboard}
+          data={filteredLeaderboard}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => (
             <View style={styles.userRow}>
@@ -102,7 +155,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 3
+    elevation: 3,
   },
   rankContainer: { width: 50, alignItems: "center" },
   rank: { fontSize: 22, fontWeight: "bold", color: "#357" },
@@ -110,6 +163,14 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontWeight: "bold", color: "#222" },
   scoreText: { fontSize: 16, color: "#555", marginTop: 5 },
   percentageText: { fontSize: 16, color: "#555", marginTop: 5 },
+  toggleButton: {
+    backgroundColor: "#357",
+    paddingVertical: 10,
+    marginVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  toggleButtonText: { color: "#fff", fontSize: 18 },
 });
 
 export default StatsScreen;
