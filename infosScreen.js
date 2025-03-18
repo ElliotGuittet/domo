@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity, TextInput } from "react-native";
 import { db } from "./firebaseConfig";
-import { collection, getDocs, orderBy, query, addDoc, where } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, addDoc, where, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from '@expo/vector-icons';
 import { getAuth } from "firebase/auth";
@@ -12,6 +12,7 @@ const InfosScreen = () => {
   const [titre, setTitre] = useState("");
   const [description, setDescription] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -40,7 +41,7 @@ const InfosScreen = () => {
     setLoading(false);
   };
 
-  const addNote = async () => {
+  const handleSaveNote = async () => {
     if (!titre.trim() || !description.trim()) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
@@ -52,20 +53,56 @@ const InfosScreen = () => {
     }
 
     try {
-      await addDoc(collection(db, "infos_pratiques"), {
-        titreInfo: titre,
-        descriptionInfo: description,
-        userId: user.uid,
-      });
+      if (editingNote) {
+        // Mise à jour d'une note existante
+        await updateDoc(doc(db, "infos_pratiques", editingNote.id), {
+          titreInfo: titre,
+          descriptionInfo: description,
+        });
+      } else {
+        // Ajout d'une nouvelle note
+        await addDoc(collection(db, "infos_pratiques"), {
+          titreInfo: titre,
+          descriptionInfo: description,
+          userId: user.uid,
+        });
+      }
 
       setTitre("");
       setDescription("");
       setShowForm(false);
+      setEditingNote(null);
       fetchNotes();
     } catch (error) {
-      Alert.alert("Erreur", "Échec de l'ajout de la note.");
+      Alert.alert("Erreur", "Échec de l'opération.");
       console.error(error);
     }
+  };
+
+  const handleDeleteNote = async (noteId) => {
+    Alert.alert(
+      "Confirmation",
+      "Êtes-vous sûr de vouloir supprimer cette note ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Supprimer", onPress: async () => {
+          try {
+            await deleteDoc(doc(db, "infos_pratiques", noteId));
+            fetchNotes();
+          } catch (error) {
+            Alert.alert("Erreur", "Impossible de supprimer la note.");
+            console.error(error);
+          }
+        }}
+      ]
+    );
+  };
+
+  const handleEditNote = (note) => {
+    setTitre(note.titreInfo);
+    setDescription(note.descriptionInfo);
+    setEditingNote(note);
+    setShowForm(true);
   };
 
   return (
@@ -80,14 +117,23 @@ const InfosScreen = () => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.noteContainer}>
-              <Text style={styles.noteTitle}>{item.titreInfo}</Text>
+              <View style={styles.noteHeader}>
+                <Text style={styles.noteTitle}>{item.titreInfo}</Text>
+                <View style={styles.iconContainer}>
+                  <TouchableOpacity onPress={() => handleEditNote(item)}>
+                    <AntDesign name="edit" size={20} color="#007AFF" style={styles.icon} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteNote(item.id)}>
+                    <AntDesign name="delete" size={20} color="#eb4941" style={styles.icon} />
+                  </TouchableOpacity>
+                </View>
+              </View>
               <Text style={styles.noteDescription}>{item.descriptionInfo}</Text>
             </View>
           )}
         />
       )}
 
-      {/* Formulaire d'ajout */}
       {showForm && (
         <View style={styles.formContainer}>
           <TextInput
@@ -103,14 +149,18 @@ const InfosScreen = () => {
             multiline
             style={styles.descriptionInput}
           />
-          <TouchableOpacity style={styles.addButton} onPress={addNote}>
-            <Text style={styles.addButtonText}>Ajouter une note</Text>
+          <TouchableOpacity style={styles.addButton} onPress={handleSaveNote}>
+            <Text style={styles.addButtonText}>{editingNote ? "Modifier la note" : "Ajouter une note"}</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Bouton pour afficher le formulaire */}
-      <TouchableOpacity style={styles.floatingButton} onPress={() => setShowForm(!showForm)}>
+      <TouchableOpacity style={styles.floatingButton} onPress={() => {
+        setShowForm(!showForm);
+        setEditingNote(null);
+        setTitre("");
+        setDescription("");
+      }}>
         <AntDesign name={showForm ? "close" : "plus"} size={24} color="white" />
       </TouchableOpacity>
     </View>
@@ -131,6 +181,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
+  noteHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   noteTitle: {
     fontWeight: "bold",
     fontSize: 16,
@@ -138,44 +193,11 @@ const styles = StyleSheet.create({
   noteDescription: {
     fontSize: 14,
   },
-  emptyMessage: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "gray",
-    marginTop: 20,
+  iconContainer: {
+    flexDirection: "row",
   },
-  formContainer: {
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-  },
-  descriptionInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    minHeight: 80,
-  },
-  addButton: {
-    backgroundColor: "#eb4941",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  icon: {
+    marginLeft: 10,
   },
   floatingButton: {
     position: "absolute",
