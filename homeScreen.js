@@ -62,6 +62,13 @@ const HomeScreen = () => {
         <Text style={styles.buttonText}>Quiz</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Infos pratiques")}
+      >
+        <Text style={styles.buttonText}>Infos pratiques</Text>
+      </TouchableOpacity>
+
       {/* Vérifier si les informations sont complètes avant d'afficher le bouton News */}
       {isUserDataComplete() ? (
         <TouchableOpacity
