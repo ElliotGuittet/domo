@@ -5,6 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./loginScreen";
 import ProfileScreen from "./profileScreen";
 import ChangePasswordScreen from "./changePasswordScreen";
+import QuizListScreen from "./quizListScreen";
 import QuizScreen from "./quizScreen";
 import HomeScreen from "./homeScreen";
 import NewsScreen from "./newsScreen";
@@ -42,6 +43,7 @@ const App = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Informations personnelles" component={ProfileScreen} />
             <Stack.Screen name="Modifier Mot de Passe" component={ChangePasswordScreen} />
+            <Stack.Screen name="Ouvrir listes de quizs" component={QuizListScreen} />
             <Stack.Screen name="Ouvrir quiz" component={QuizScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="News" component={NewsScreen} />

@@ -46,7 +46,7 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Bienvenue, {user?.email}</Text>
+      <Text style={styles.welcomeText}>Bienvenue, {user?.firstName ?? user?.email}</Text>
 
       <TouchableOpacity
         style={styles.button}
@@ -57,7 +57,7 @@ const HomeScreen = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("Ouvrir quiz")}
+        onPress={() => navigation.navigate("Ouvrir listes de quizs")}
       >
         <Text style={styles.buttonText}>Quiz</Text>
       </TouchableOpacity>
